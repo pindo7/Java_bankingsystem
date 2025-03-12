@@ -80,6 +80,15 @@ public class general {
         System.out.println("4. Sydney Branch: 80 George Street, Sydney, Australia");
     }
 
+    public static void currencyExchangeRates(){
+        System.out.println("Currency Exchange Rates (as of March 2, 2025)");
+        System.out.println("1 USD = 0.92 EUR");
+        System.out.println("1 USD = 0.78 GBP");
+        System.out.println("1 USD = 114.32 JPY");
+        System.out.println("1 USD = 0.85 CHF");
+        System.out.println("1 USD = 1.35 CAD");
+    }
+
     public static void printOther(){
         Scanner scan = new Scanner(System.in);
         int choice;
@@ -93,7 +102,7 @@ public class general {
             System.out.println("6. Branch locations");
             System.out.println("7. Exit");
             System.out.print("Enter your choice: ");
-            choice = scan.nextInt();
+            choice = Jake.getInteger();
             switch (choice) {
                 case 1:
                     bankHistory();
@@ -102,7 +111,7 @@ public class general {
                     termsConditions();
                     break;
                 case 3:
-                    System.out.println("Currency exchange rates");
+                    currencyExchangeRates();
                     break;
                 case 4:
                     prinFAQ();

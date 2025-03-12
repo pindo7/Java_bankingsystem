@@ -1,3 +1,4 @@
+import javax.sql.rowset.spi.SyncProvider;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -45,17 +46,17 @@ class Account {
     public void withdrawMoney(double amount, String pincode) {
         System.out.println("\n\n\n");
         System.out.println("=== Money withdraw ===");
-        if (this.pincode.equals(pincode)) {
             if (this.balance - amount < 0 || this.balance == 0.0) {
                 System.out.println("Insufficient Balance");
             } else {
                 this.balance -= amount;
                 System.out.println("Balance: " + this.balance);
-            }
         }
-            else {
-            System.out.println("Wrong pincode");
-        }
+    }
+
+    public void changePincode(String pincode) {
+        this.pincode = pincode;
+        System.out.println("Pincode: " + this.pincode);
     }
 }
 public class Acc {
@@ -169,6 +170,7 @@ public class Acc {
             }
             else{
                 System.out.println("Account not found");
+                break;
             }
             if (count == 0) {
                 break;
@@ -179,19 +181,23 @@ public class Acc {
     public static void transferMoney(int fromAccountNumber, int toAccountNumber, double amount) {
         account = accounts.get(fromAccountNumber);
         int counter = 3;
+        pincode = getPincode();
         while(true){
-            pincode = getPincode();
             if(account.pincode.equals(pincode)) {
-                if(account.balance >= amount){
+                if (account.balance >= amount) {
                     account.balance -= amount;
                     account = accounts.get(toAccountNumber);
                     account.balance += amount;
                     System.out.println("Transaction successful");
                     break;
+                } else {
+                    System.out.println("Transaction failed. Insufficient Balance");
+                    break;
+                }
             }
             else{
                 if(counter>0) {
-                    System.out.println("You entered wrong pin. You have " + counter" attempts left");
+                    System.out.println("You entered wrong pin. You have " + counter + " attempts left");
                     pincode = getPincode();
                     counter--;
                 }
@@ -201,6 +207,55 @@ public class Acc {
                     break;
                 }
             }
+            }
+        }
+
+        public static void accountSettings(){
+        while(true) {
+            System.out.println("=== Account settings ===");
+            System.out.println("1. Change password");
+            System.out.println("2. Delete account");
+            System.out.println("3. Exit");
+            choice = Jake.getInteger();
+            switch (choice) {
+                case 1:
+                    int counter = 3;
+                    String newPincode;
+                    System.out.print("Enter account number: ");
+                    accountNumber = Jake.getInteger();
+                    account = accounts.get(accountNumber);
+                    if (account != null) {
+                        while (true) {
+                            pincode = getPincode();
+                            if (account.pincode.equals(pincode)) {
+                                System.out.print("Enter new pincode: ");
+                                newPincode = getPincode();
+                                account.changePincode(newPincode);
+                                break;
+                            } else {
+                                System.out.println("Wrong pincode");
+                                counter--;
+                                if (counter == 0) {
+                                    System.out.println("You have no more attempts");
+                                    break;
+                                }
+                                System.out.print("Enter correct pincode " + counter + "attempts left: ");
+                            }
+                        }
+                        break;
+                    }
+                case 2:
+                    System.out.print("Enter account number: ");
+                    accountNumber = Jake.getInteger();
+                    deleteAccount(accountNumber);
+                    break;
+                case 3:
+                    break;
+                default:
+                    System.out.println("Invalid choice");
+            }
+            if(choice == 3){
+                break;
             }
         }
     }
@@ -213,58 +268,81 @@ public class Acc {
                 System.out.println("2. Deposit money");
                 System.out.println("3. Withdraw money");
                 System.out.println("4. Transfer money");
-                System.out.println("5. Loan application");
-                System.out.println("7. Create a savings account");
-                System.out.println("8. Account settings");
-                System.out.println("9. Other");
-                System.out.println("10. Logout");
+                System.out.println("5. Account settings");
+                System.out.println("6. Other");
+                System.out.println("7. Back to main menu");
                 System.out.print("Enter your choice: ");
-                choice = sc.nextInt();
+                choice = Jake.getInteger();
                 switch (choice) {
                     case 1:
                         System.out.print("Enter account number: ");
-                        accountNumber = sc.nextInt();
+                        accountNumber = Jake.getInteger();
                         account = accounts.get(accountNumber);
                         if(account != null){
                             account.accountInfo();
+                            break;
                         }
                         else{
                             System.out.println("Account " + accountNumber + " not found");
+                            break;
                         }
-                        break;
                     case 2:
                         System.out.print("Enter account number: ");
-                        accountNumber = sc.nextInt();
+                        accountNumber = Jake.getInteger();
                         account = accounts.get(accountNumber);
-                        System.out.print("Enter amount: ");
-                        amount = sc.nextDouble();
                         if(account != null){
-                            account.depositMoney(amount);
+                            System.out.print("Enter amount to deposit: ");
+                                amount = Jake.getDouble();
+                                if (amount < 1) {
+                                    System.out.println("Deposit failed! Minimal deposit is 1€");
+                                }
+                                else {
+                                    account.depositMoney(amount);
+                                    break;
+                                }
                         }
                         else{
                             System.out.println("Account " + accountNumber + " not found");
+                            break;
                         }
-                        break;
                     case 3:
+                        int pincodeCounter = 3;
                         System.out.print("Enter account number: ");
-                        accountNumber = sc.nextInt();
+                        accountNumber = Jake.getInteger();
                         account = accounts.get(accountNumber);
-                        System.out.print("Enter pincode: ");
-                        pincode = sc.nextLine();
-                        System.out.print("Enter amount: ");
-                        amount = sc.nextDouble();
                         if(account != null){
-                            account.withdrawMoney(amount, pincode);
+                            while(true){
+                                pincode = getPincode();
+                                if(account.pincode.equals(pincode)) {
+                                    System.out.print("Enter amount to withdraw: ");
+                                    amount = Jake.getDouble();
+                                    account.withdrawMoney(amount, pincode);
+                                    break;
+                                }
+                                else{
+                                    System.out.println("Wrong pincode");
+                                    pincodeCounter--;
+                                    if(pincodeCounter == 0){
+                                        System.out.println("You have no more attempts");
+                                        break;
+                                    }
+                                    System.out.println("Enter correct pincode - " + pincodeCounter + " attempts left");
+                                }
+                            }
+                            break;
                         }
-                        break;
+                        else{
+                            System.out.println("Account " + accountNumber + " not found");
+                            break;
+                        }
                     case 4:
                         System.out.print("Enter account number: ");
-                        accountNumber = sc.nextInt();
+                        accountNumber = Jake.getInteger();
                         System.out.print("Enter reciever account: ");
-                        receiverAccountNumber = sc.nextInt();
+                        receiverAccountNumber = Jake.getInteger();
                         account = accounts.get(accountNumber);
                         System.out.print("Enter amount: ");
-                        amount = sc.nextDouble();
+                        amount = Jake.getDouble();
                         if(account != null){
                             account = accounts.get(receiverAccountNumber);
                             if(account != null) {
@@ -278,11 +356,17 @@ public class Acc {
                             System.out.println("Account " + accountNumber + " not found");
                         }
                         break;
-                    case 10:
+                    case 5:
+                        accountSettings();
+                        break;
+                    case 6:
+                        general.printOther();
+                        break;
+                    case 7:
                         break;
                     default: System.out.println("Invalid choice");
                 }
-                if (choice == 10) {
+                if (choice == 7) {
                     break;
                 }
             }
